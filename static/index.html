@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Night Tide</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <div class="rain" aria-hidden="true"></div>
+  <div class="shell">
+    <header class="mast">
+      <p class="wordmark">Night Tide</p>
+      <p class="berth" id="room-label">The quay</p>
+      <div class="tools">
+        <button type="button" class="ghost" id="stories-btn">Stories</button>
+        <button type="button" class="ghost" id="new-btn">New game</button>
+      </div>
+    </header>
+
+    <dl class="vitals" id="vitals"></dl>
+
+    <main class="stage">
+      <p class="kind" id="ending-kind" hidden></p>
+      <article class="passage" id="passage"></article>
+      <p class="flavor" id="flavor" hidden></p>
+      <nav class="exits" id="exits" aria-label="Exits"></nav>
+      <ol class="ledger" id="ledger" hidden></ol>
+      <div class="reader" id="reader" hidden></div>
+    </main>
+
+    <form class="say" id="say-form">
+      <label class="sr" for="say-input">What you do</label>
+      <input id="say-input" name="text" type="text" autocomplete="off" placeholder="or type what you do">
+      <button type="submit">Say</button>
+    </form>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

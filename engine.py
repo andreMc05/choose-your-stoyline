@@ -112,9 +112,18 @@ class Game:
         }
 
 
+def open_game(world: World, referee: Referee, store: SaveStore, *, new: bool = False) -> Game:
+    if new:
+        store.clear()
+        return Game(world, referee, store=store)
+    if store.exists():
+        return Game.restore(world, referee, store)
+    return Game(world, referee, store=store)
+
+
 def boot(referee: Referee | None = None) -> Game:
     from referee import make_referee
 
     world = load_world()
     store = SaveStore(Path(__file__).parent / "saves", world)
-    return Game(world, referee or make_referee(), store=store)
+    return open_game(world, referee or make_referee(), store)

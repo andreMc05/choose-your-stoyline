@@ -4,7 +4,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from engine import Game
+from engine import Game, open_game
 from referee import make_referee
 from render import parse_input, render_node, render_status
 from save import SAVE_VERSION, SaveError, SaveStore
@@ -23,12 +23,11 @@ def main() -> None:
     referee = make_referee()
 
     if args.new:
-        store.clear()
-        game = Game(world, referee, store=store)
+        game = open_game(world, referee, store, new=True)
         print("New game.")
     elif store.exists():
         try:
-            game = Game.restore(world, referee, store)
+            game = open_game(world, referee, store)
         except SaveError as exc:
             print(f"Could not load save: {exc}")
             print("Pass --new to start over.")
@@ -38,7 +37,7 @@ def main() -> None:
             f"(save v{SAVE_VERSION}). Jev was not called."
         )
     else:
-        game = Game(world, referee, store=store)
+        game = open_game(world, referee, store)
 
     print(f"{world.title}")
     print("Type a number, free text, or quit. status / new also work.\n")

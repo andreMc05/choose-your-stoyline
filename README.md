@@ -7,7 +7,8 @@ A riverfront courier job in the rain. You have forged papers, one coin, and a se
 No API key required. Python 3.10+ (this repo’s `.venv` is 3.13).
 
 ```
-.venv/bin/python cli.py
+.venv/bin/python web.py          # browser UI at http://127.0.0.1:5050
+.venv/bin/python cli.py          # terminal
 ```
 
 ## Story
@@ -41,9 +42,12 @@ That installs `pydantic` and `PyYAML`. Leave `TYPESAFE_API_KEY` unset and the st
 From the repo root:
 
 ```
+.venv/bin/python web.py          # UI at http://127.0.0.1:5050
 .venv/bin/python cli.py          # resume saves/game.json if it exists
 .venv/bin/python cli.py --new    # wipe the save and start over
 ```
+
+The web UI uses the same engine and `saves/game.json`. Click an exit or type a line. After an ending, **Read the story** replays the night. **Stories** keeps finished runs in `saves/archive/` so a new game does not erase them.
 
 At the prompt:
 
@@ -65,6 +69,7 @@ Optional check after content or keyword edits:
 - `data/nodes.yaml` — rooms and exits
 - `data/tests.yaml` — eval utterances
 - `cli.py` — REPL
+- `web.py` — local Flask UI (`static/`)
 - `saves/game.json` — current save (v1)
 - `saves/story.txt` — concatenated passages
 

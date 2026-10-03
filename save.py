@@ -50,6 +50,14 @@ def save_path(saves_dir: Path) -> Path:
     return saves_dir / "game.json"
 
 
+def archive_id_for(started_at: str) -> str:
+    return "".join(ch for ch in started_at if ch.isalnum())
+
+
+def archive_dir(saves_dir: Path) -> Path:
+    return saves_dir / "archive"
+
+
 def v0_log_path(saves_dir: Path) -> Path:
     return saves_dir / "turns.jsonl"
 
@@ -67,6 +75,13 @@ class SaveStore:
         )
 
     def clear(self) -> None:
+        if self.path.exists():
+            try:
+                prev = SaveBundle.model_validate_json(self.path.read_text(encoding="utf-8"))
+                if prev.state.ended:
+                    self._put_archive(prev)
+            except Exception:
+                pass
         self.started_at = _now()
         for name in ("game.json", "turns.jsonl", "story.txt"):
             p = self.saves_dir / name
@@ -96,7 +111,61 @@ class SaveStore:
         tmp.replace(self.path)
         story_path = self.saves_dir / "story.txt"
         story_path.write_text("\n\n".join(story) + "\n", encoding="utf-8")
+        if state.ended:
+            self._put_archive(bundle)
         return bundle
+
+    def _put_archive(self, bundle: SaveBundle) -> Path:
+        dest_dir = archive_dir(self.saves_dir)
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        dest = dest_dir / f"{archive_id_for(bundle.started_at)}.json"
+        dest.write_text(bundle.model_dump_json(indent=2), encoding="utf-8")
+        return dest
+
+    def archive_if_ended(self, state: PlayerState, turns: list[TurnLog], story: list[str]) -> None:
+        if state.ended:
+            self.write(state, turns, story)
+
+    def list_stories(self) -> list[dict[str, Any]]:
+        dest_dir = archive_dir(self.saves_dir)
+        items: list[dict[str, Any]] = []
+        if not dest_dir.exists():
+            return items
+        for path in dest_dir.glob("*.json"):
+            try:
+                bundle = SaveBundle.model_validate_json(path.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            ending_id = bundle.state.ending_id
+            kind = None
+            if ending_id and ending_id in self.world.endings:
+                kind = self.world.endings[ending_id].kind
+            items.append(
+                {
+                    "id": path.stem,
+                    "title": bundle.world_title,
+                    "started_at": bundle.started_at,
+                    "updated_at": bundle.updated_at,
+                    "turn": bundle.state.turn,
+                    "ended": bundle.state.ended,
+                    "ending_id": ending_id,
+                    "ending_kind": kind,
+                }
+            )
+        items.sort(key=lambda row: row.get("updated_at") or "", reverse=True)
+        return items
+
+    def load_story(self, story_id: str) -> SaveBundle:
+        safe = "".join(ch for ch in story_id if ch.isalnum())
+        if not safe:
+            raise SaveError("unknown story")
+        path = archive_dir(self.saves_dir) / f"{safe}.json"
+        if not path.exists():
+            raise SaveError("unknown story")
+        try:
+            return SaveBundle.model_validate_json(path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            raise SaveError("story is unreadable") from exc
 
     def load(self) -> SaveBundle:
         raw_path = self.path

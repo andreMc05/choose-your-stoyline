@@ -12,6 +12,7 @@ Read [`ARCHITECTURE.md`](ARCHITECTURE.md) before changing the pipeline. Read [`G
 ## Run (Python 3.13 venv — system python3 is 3.9 and will fail)
 
 ```
+.venv/bin/python web.py          # UI at http://127.0.0.1:5050
 .venv/bin/python cli.py
 .venv/bin/python cli.py --new
 .venv/bin/python eval_harness.py

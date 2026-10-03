@@ -1,0 +1,27 @@
+---
+description: Night Tide ownership, run commands, and where to read first
+alwaysApply: true
+---
+
+# Night Tide
+
+CLI CYOA. Jev/stub **labels** an exit. Python **owns** flags, inventory, HP, metrics, destinations, endings, saves.
+
+Read [`ARCHITECTURE.md`](ARCHITECTURE.md) before changing the pipeline. Read [`GRAPH.md`](GRAPH.md) before changing rooms or endings. `data/nodes.yaml` prose is LOCKED.
+
+## Run (Python 3.13 venv — system python3 is 3.9 and will fail)
+
+```
+.venv/bin/python cli.py
+.venv/bin/python cli.py --new
+.venv/bin/python eval_harness.py
+```
+
+No `TYPESAFE_API_KEY` → `StubReferee`. Do not call Jev on save load.
+
+## Do not
+
+- Let the referee write flags, items, HP, or next_node
+- Invent exits at interpret time (only listed ids + `unmapped`)
+- Rewrite locked passage text while "fixing" prompts
+- Skip `eval_harness.py` after exit, keyword, criteria, or resolver changes

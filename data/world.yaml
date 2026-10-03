@@ -1,0 +1,70 @@
+title: Night Tide
+start_node: docks_night
+hp_default: 3
+
+metrics:
+  nerve:
+    min: 0
+    max: 3
+    default: 1
+    label: Nerve
+  caution:
+    min: 0
+    max: 3
+    default: 1
+    label: Caution
+  wanted_heat:
+    min: 0
+    max: 3
+    default: 0
+    label: Heat
+
+items:
+  forged_papers:
+    name: forged papers
+    description: Damp travel papers. The name is almost yours.
+  silver_coin:
+    name: silver coin
+    description: One coin. A tip, if you spend it that way.
+  sealed_packet:
+    name: sealed packet
+    description: Oilcloth and wax. No return. Paid to stay closed.
+
+starting_inventory:
+  - forged_papers
+  - silver_coin
+  - sealed_packet
+
+starting_flags:
+  heard_voss: false
+  papers_shown: false
+  coin_spent: false
+  packet_intact: true
+  packet_opened: false
+  crew_trust: low
+
+endings:
+  end_clean_berth:
+    kind: win
+    passage: |
+      The packet stayed closed. The tide takes the Marrow and
+      nobody on deck looks at you twice. A bunk. A job finished.
+      A city that does not yet have your name.
+  end_watched_berth:
+    kind: bittersweet
+    passage: |
+      You are aboard when the horn sounds. The packet is accounted
+      for, more or less. So is your face. Someone on this crew
+      will remember it at the next port.
+  end_detained:
+    kind: lose
+    passage: |
+      The watch house smells of coal and wet wool. Your papers
+      sit on the desk. The packet does not sit with you.
+      Dawn comes. The ship does not.
+  end_packet_gone:
+    kind: lose
+    passage: |
+      You are free enough to watch the Marrow leave. The oilcloth
+      is gone — sold, seized, or thrown. Whoever paid you will
+      not pay twice.

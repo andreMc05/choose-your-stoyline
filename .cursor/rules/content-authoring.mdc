@@ -1,0 +1,36 @@
+---
+description: YAML content rules for Night Tide rooms, world, and eval tests
+globs: data/**/*.yaml
+alwaysApply: false
+---
+
+# Content YAML
+
+- `world.yaml` — metrics, items, starting inventory/flags, endings. Not rooms.
+- `nodes.yaml` — rooms and exits. Passages, fail_flavor, and clarify_prompt are LOCKED canon.
+- `tests.yaml` — `{node_id, utterance, expected_exit}`. Include unmapped/injection cases.
+
+## Exits
+
+```yaml
+# button
+- id: flash_papers
+  button_label: Show the papers
+  visible: true
+  criteria: Player shows or hands over papers.
+  next_node: customs_desk
+
+# parser-only (no number in the CLI)
+- id: name_voss
+  button_label: null
+  visible: false
+  requirements:
+    flags_eq: { heard_voss: true }
+  next_node: gangway
+```
+
+- New `id` needs `StubReferee.KEYWORDS` in `referee.py` or stub matching stays weak.
+- New `noul_ids` / `score_ids` must exist in `questions.py` catalogs.
+- `next_node` / `fail_node` must be a node in this file or an ending id in `world.yaml`.
+- `hide_out` heat split (`wanted_heat >= 2` → fail dest) is **code** in `apply_exit`, not YAML.
+- Ending payoffs and parser-only list: `GRAPH.md`.

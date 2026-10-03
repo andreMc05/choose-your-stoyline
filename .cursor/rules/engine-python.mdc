@@ -1,0 +1,26 @@
+---
+description: Engine conventions for the Night Tide turn pipeline and saves
+globs: "*.py"
+alwaysApply: false
+---
+
+# Engine
+
+`Game.submit`: jev_state → `referee.interpret` → `resolve` → `apply_exit` or stay → `TurnLog` → persist.
+
+```python
+# ❌ BAD — referee mutates world
+state.flags["wanted"] = False
+
+# ✅ GOOD — referee returns a label; resolver/apply_exit write state
+result = referee.interpret(node, state, jev_state)
+decision = resolve(world, node, state, choice, conf, top, nouls)
+```
+
+- `resolve` order: injection noul ≥ 0.7 → unmapped → confidence/prob < 0.55 → requirements → advance.
+- Scores are logged only; do not gate on them unless you change `resolve` and tests.
+- `hide_out`: `apply_exit` uses `fail_node` when `wanted_heat >= 2`. Keep that in code.
+- Restore: never call Jev. Replay exits for story; **TurnLog snapshots win**.
+- Save v1 (`game_id=night_tide`). Refuse newer `save_version`. Write via temp + replace.
+- `UNMAPPED = "unmapped"` is always a legal choice.
+- After resolver/keyword/exit edits: `.venv/bin/python eval_harness.py`.

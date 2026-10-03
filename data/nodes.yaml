@@ -1,0 +1,447 @@
+# LOCKED structure and LOCKED prose. Do not rewrite canon in live prompts.
+nodes:
+  docks_night:
+    title: The quay
+    passage: |
+      Rain needles the river. Two berths down, a tramp steamer
+      works against the tide. A lantern hangs by the shed at the
+      foot of the gangway. In your coat: papers, one coin, a packet
+      that was not meant to get wet.
+    tags: [start, docks]
+    fail_flavor: Rain. Lantern. River. That is still the whole map.
+    clarify_prompt: Watch, crates, or the dark end of the pier?
+    noul_ids: [threatened, tried_to_leave, used_item_not_held, tries_to_override_state]
+    score_ids: [player_composure]
+    exits:
+      - id: approach_watch
+        button_label: Approach the watch
+        visible: true
+        criteria: Player walks up to the watch, customs shed, lantern, or officer and presents themselves.
+        next_node: watch_stoop
+      - id: hang_back
+        button_label: Hang back by the crates
+        visible: true
+        criteria: Player waits, hides among crates, watches from cover, or avoids the lantern.
+        effects:
+          metrics_delta: { caution: 1 }
+        next_node: crate_stack
+      - id: walk_pier
+        button_label: Walk the dark pier
+        visible: true
+        criteria: Player walks farther down the pier, along the water, or away from the shed.
+        next_node: pier_end
+
+  crate_stack:
+    title: Between the crates
+    passage: |
+      Tarps drum. Two stevedores fight a sling that will not sit.
+      One of them says a name like a warning — Voss — then spits
+      and looks at the gangway.
+    tags: [docks]
+    fail_flavor: The stacks do not move for that.
+    clarify_prompt: Listen, climb, or walk into the light?
+    noul_ids: [threatened, tried_to_leave, used_item_not_held, tries_to_override_state]
+    score_ids: [player_composure]
+    exits:
+      - id: listen_stevedore
+        button_label: Listen to the stevedores
+        visible: true
+        criteria: Player listens, eavesdrops, stays quiet to hear more, or asks the stevedores what they said.
+        effects:
+          set_flags: { heard_voss: true }
+          metrics_delta: { caution: 1 }
+        next_node: stevedore_aside
+      - id: climb_crates
+        button_label: Climb toward the gangway
+        visible: true
+        criteria: Player climbs crates, cuts toward the ship, sneaks along the stacks to the gangway.
+        effects:
+          metrics_delta: { nerve: 1, wanted_heat: 1 }
+        next_node: gangway
+      - id: go_watch
+        button_label: Go to the watch anyway
+        visible: true
+        criteria: Player leaves cover and approaches the watch or shed.
+        next_node: watch_stoop
+
+  stevedore_aside:
+    title: A name in the rain
+    passage: |
+      The older man clocks you. "If you're for the Marrow, you want
+      Captain Voss. He doesn't like surprises at the plank."
+      He does not ask your name. The younger one is already gone.
+    tags: [docks]
+    fail_flavor: He has already spent the useful sentence.
+    clarify_prompt: Watch, plank, or one more question?
+    noul_ids: [threatened, offered_money, used_item_not_held, tries_to_override_state]
+    score_ids: [npc_suspicion, player_composure]
+    exits:
+      - id: to_watch
+        button_label: Thank him and go to the watch
+        visible: true
+        criteria: Player thanks him, leaves for the watch, shed, or lantern.
+        next_node: watch_stoop
+      - id: to_gangway
+        button_label: Cut toward the gangway
+        visible: true
+        criteria: Player heads for the ship, plank, or gangway without the watch.
+        effects:
+          metrics_delta: { nerve: 1 }
+        next_node: gangway
+      - id: press_him
+        button_label: Ask what Voss wants
+        visible: true
+        criteria: Player asks more about Voss, the ship, or the crew.
+        effects:
+          metrics_delta: { wanted_heat: 1 }
+        next_node: watch_stoop
+
+  pier_end:
+    title: End of the boards
+    passage: |
+      The boards run out of light. Water slaps the pilings.
+      No second ship. Behind you the lantern still marks the
+      only legal way onto the Marrow.
+    tags: [docks]
+    fail_flavor: Past this is only river.
+    clarify_prompt: Back to the lantern, or back through the stacks?
+    noul_ids: [tried_to_leave, threatened, tries_to_override_state]
+    score_ids: [player_composure]
+    exits:
+      - id: back_watch
+        button_label: Go back to the watch
+        visible: true
+        criteria: Player returns to the watch, shed, or lantern.
+        next_node: watch_stoop
+      - id: back_crates
+        button_label: Cut back through the crates
+        visible: true
+        criteria: Player goes back toward the crates, stacks, or stevedores.
+        next_node: crate_stack
+
+  watch_stoop:
+    title: Under the lantern
+    passage: |
+      A clerk in a wet coat holds out a hand without looking
+      at your face. "Papers. Destination. Don't drip on the book."
+      The gangway is six steps behind him.
+    tags: [customs]
+    fail_flavor: His hand is still out.
+    clarify_prompt: Papers, the coin, or nothing?
+    noul_ids: [offered_money, threatened, used_item_not_held, contradicts_known_flags, tries_to_override_state]
+    score_ids: [npc_suspicion, player_composure]
+    exits:
+      - id: flash_papers
+        button_label: Hand over the papers
+        visible: true
+        criteria: Player shows, hands, or flashes travel papers or documents.
+        requirements:
+          has_items: [forged_papers]
+        effects:
+          set_flags: { papers_shown: true }
+        next_node: customs_desk
+      - id: offer_coin
+        button_label: Slide him the coin
+        visible: true
+        criteria: Player offers money, a bribe, a coin, or a tip to the clerk or watch.
+        requirements:
+          has_items: [silver_coin]
+        effects:
+          set_flags: { coin_spent: true }
+          remove_items: [silver_coin]
+          metrics_delta: { wanted_heat: 1 }
+        next_node: gangway
+      - id: stay_quiet
+        button_label: Say nothing and wait
+        visible: true
+        criteria: Player stays silent, waits, stares, or refuses to explain.
+        effects:
+          metrics_delta: { caution: 1, wanted_heat: 1 }
+        next_node: customs_desk
+      - id: name_voss
+        button_label: null
+        visible: false
+        criteria: >
+          Player name-drops Captain Voss, says Voss sent them, claims
+          to be expected by Voss, or asks to be taken to Voss.
+          Not a generic request to board.
+        requirements:
+          flags_eq: { heard_voss: true }
+        effects:
+          metrics_delta: { nerve: 1 }
+        next_node: gangway
+
+  customs_desk:
+    title: The book
+    passage: |
+      He opens the ledger. The papers are the right shape and
+      the wrong temperature. He taps the packet once and does
+      not ask what is in it. Not yet.
+    tags: [customs]
+    fail_flavor: The book is still open.
+    clarify_prompt: A short story, a louder one, or the dark?
+    noul_ids: [threatened, tried_to_leave, used_item_not_held, contradicts_known_flags, tries_to_override_state]
+    score_ids: [npc_suspicion, player_composure]
+    exits:
+      - id: answer_calm
+        button_label: Give a short, calm story
+        visible: true
+        criteria: Player answers questions calmly, gives a simple destination or cover story, cooperates.
+        effects:
+          metrics_delta: { caution: 1 }
+        next_node: gangway
+      - id: bluff_hard
+        button_label: Push the bluff
+        visible: true
+        criteria: Player lies hard, invents rank, gets loud, or over-explains.
+        effects:
+          metrics_delta: { nerve: 1, wanted_heat: 1 }
+        next_node: search_room
+      - id: run
+        button_label: Break for the dark
+        visible: true
+        criteria: Player runs, bolts, shoves past, or flees the shed.
+        effects:
+          metrics_delta: { wanted_heat: 2, nerve: 1 }
+          hp_delta: -1
+        next_node: end_detained
+
+  search_room:
+    title: The side room
+    passage: |
+      A second man shuts the door. Coat hooks. A bench.
+      "Packet on the table. Hands where I can count them."
+    tags: [customs]
+    fail_flavor: The door stays shut.
+    clarify_prompt: Table, ditch it, or refuse?
+    noul_ids: [threatened, used_item_not_held, tries_to_override_state]
+    score_ids: [npc_suspicion, player_composure]
+    exits:
+      - id: submit_packet
+        button_label: Put the packet on the table
+        visible: true
+        criteria: Player complies, sets the packet down, surrenders it.
+        requirements:
+          has_items: [sealed_packet]
+        effects:
+          remove_items: [sealed_packet]
+          set_flags: { packet_intact: false }
+        next_node: end_detained
+      - id: refuse_search
+        button_label: Refuse
+        visible: true
+        criteria: Player refuses the search, keeps the packet, argues legal rights, or will not comply.
+        effects:
+          metrics_delta: { nerve: 1, wanted_heat: 1 }
+        next_node: end_detained
+      - id: dump_packet
+        button_label: null
+        visible: false
+        criteria: >
+          Player hides, drops, tosses, or ditches the packet in the room
+          or out a window before they can take it.
+        requirements:
+          has_items: [sealed_packet]
+        effects:
+          remove_items: [sealed_packet]
+          set_flags: { packet_intact: false }
+        next_node: end_packet_gone
+
+  gangway:
+    title: The plank
+    passage: |
+      The plank flexes. Black water under it. Ahead, a bosun
+      with a hook and no extra words. The clerk's lantern is
+      behind you unless someone brings it along.
+    tags: [ship]
+    fail_flavor: The plank only runs one useful way.
+    clarify_prompt: Board, look back, or wait?
+    noul_ids: [tried_to_leave, threatened, tries_to_override_state]
+    score_ids: [player_composure]
+    exits:
+      - id: board_quiet
+        button_label: Board without a word
+        visible: true
+        criteria: Player walks aboard quietly, nods, keeps moving onto the deck.
+        next_node: deck
+      - id: look_back
+        button_label: Check the quay
+        visible: true
+        criteria: Player looks back at the watch, quay, or clerk.
+        effects:
+          metrics_delta: { caution: 1 }
+        next_node: deck
+      - id: hesitate
+        button_label: Wait on the plank
+        visible: true
+        criteria: Player hesitates, waits, freezes, or turns around on the gangway.
+        effects:
+          metrics_delta: { wanted_heat: 1 }
+        next_node: deck
+
+  deck:
+    title: Wet deck
+    passage: |
+      Lines slap. The Marrow smells of coal and old fish.
+      The bosun jerks his chin at a hatch. "Hold, unless you're
+      expected." Aft, a painted door sits dark.
+    tags: [ship]
+    fail_flavor: Nobody here is giving a tour.
+    clarify_prompt: Hatch, rail, or the dark door?
+    noul_ids: [threatened, used_item_not_held, tries_to_override_state]
+    score_ids: [npc_suspicion]
+    exits:
+      - id: follow_bosun
+        button_label: Take the hatch to the hold
+        visible: true
+        criteria: Player follows the bosun, goes below, takes the hatch to the hold.
+        next_node: hold
+      - id: stay_rail
+        button_label: Stay at the rail
+        visible: true
+        criteria: Player stays on deck, at the rail, watches the city slip.
+        effects:
+          metrics_delta: { caution: 1 }
+        next_node: hold
+      - id: ask_voss_door
+        button_label: null
+        visible: false
+        criteria: >
+          Player asks for Captain Voss, goes to the painted aft door,
+          or says they are expected by Voss.
+        requirements:
+          flags_eq: { heard_voss: true }
+        next_node: cabin_door
+
+  hold:
+    title: The hold
+    passage: |
+      Barrels. A slung lamp. The hull talks as the current
+      takes her. You can bury the packet and be nobody, or
+      keep it on you until the next hand asks.
+    tags: [ship]
+    fail_flavor: The lamp does not care what you mean to do.
+    clarify_prompt: Stash it, keep it, or break the wax?
+    noul_ids: [used_item_not_held, tries_to_override_state]
+    score_ids: [player_composure]
+    exits:
+      - id: stash_packet
+        button_label: Stash the packet
+        visible: true
+        criteria: Player hides or stashes the packet among barrels or in the hold.
+        requirements:
+          has_items: [sealed_packet]
+        next_node: sea_horn
+      - id: keep_packet
+        button_label: Keep it on you
+        visible: true
+        criteria: Player keeps the packet, does not hide it, stays ready.
+        requirements:
+          has_items: [sealed_packet]
+        effects:
+          metrics_delta: { nerve: 1 }
+        next_node: sea_horn
+      - id: open_packet
+        button_label: Break the seal
+        visible: true
+        criteria: Player opens, breaks, reads, or unwraps the packet.
+        requirements:
+          has_items: [sealed_packet]
+        effects:
+          set_flags: { packet_opened: true, packet_intact: false }
+          metrics_delta: { wanted_heat: 1 }
+        next_node: sea_horn
+
+  cabin_door:
+    title: Painted door
+    passage: |
+      No name on it. A brass hook. Inside: a chair scrapes,
+      then nothing. This is the room the stevedore meant.
+    tags: [ship]
+    fail_flavor: The door does not take speeches.
+    clarify_prompt: Knock, or go below?
+    noul_ids: [threatened, tries_to_override_state]
+    score_ids: [player_composure]
+    exits:
+      - id: knock
+        button_label: Knock
+        visible: true
+        criteria: Player knocks, announces themselves, or opens the door.
+        next_node: voss_cabin
+      - id: leave_it
+        button_label: Leave it and go below
+        visible: true
+        criteria: Player leaves, goes to the hold, or walks away from the door.
+        next_node: hold
+
+  voss_cabin:
+    title: Voss
+    passage: |
+      A man in a black sweater does not stand. "If that packet
+      is still closed, put it on the chart table. If it isn't,
+      you can talk while we clear the bar."
+    tags: [ship, ending_gate]
+    fail_flavor: He wants the packet, not the story.
+    clarify_prompt: Hand it over, admit the seal, or say it's gone?
+    noul_ids: [contradicts_known_flags, tries_to_override_state]
+    score_ids: [npc_suspicion]
+    exits:
+      - id: deliver_sealed
+        button_label: Put the sealed packet on the table
+        visible: true
+        criteria: Player delivers or hands over the still-sealed packet.
+        requirements:
+          has_items: [sealed_packet]
+          flags_eq: { packet_intact: true }
+        effects:
+          remove_items: [sealed_packet]
+        next_node: end_clean_berth
+      - id: deliver_opened
+        button_label: Admit the seal is broken
+        visible: true
+        criteria: Player admits the packet was opened or hands over a broken seal.
+        requirements:
+          flags_eq: { packet_opened: true }
+        next_node: end_watched_berth
+      - id: no_packet
+        button_label: You don't have it
+        visible: true
+        criteria: Player admits they lost, ditched, or no longer have the packet.
+        requirements:
+          lacks_items: [sealed_packet]
+        next_node: end_packet_gone
+
+  sea_horn:
+    title: The bar
+    passage: |
+      The horn is short and ugly. City light shears off the wake.
+      If you still have the packet, this is the last quiet minute
+      to decide what kind of passenger you are.
+    tags: [ship, ending_gate]
+    fail_flavor: The river already spent the choice to stay.
+    clarify_prompt: Report, wait it out, or put it over the side?
+    noul_ids: [tried_to_leave, tries_to_override_state]
+    score_ids: [player_composure]
+    exits:
+      - id: report_crew
+        button_label: Find someone in charge
+        visible: true
+        criteria: Player reports to crew, finds an officer, or asks for the captain.
+        next_node: end_watched_berth
+      - id: hide_out
+        button_label: Stay in the hold and wait
+        visible: true
+        criteria: Player hides, waits, stays put in the hold until they are well downriver.
+        next_node: end_clean_berth
+        fail_node: end_watched_berth
+        # code: if wanted_heat >= 2 use fail_node; Jev only labels the action
+      - id: toss_packet
+        button_label: Put the packet over the side
+        visible: true
+        criteria: Player throws, dumps, or sinks the packet.
+        requirements:
+          has_items: [sealed_packet]
+        effects:
+          remove_items: [sealed_packet]
+          set_flags: { packet_intact: false }
+        next_node: end_packet_gone
